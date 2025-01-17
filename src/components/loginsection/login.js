@@ -71,12 +71,26 @@ function Login() {
         if (rememberMe) {
           localStorage.setItem('credentials', JSON.stringify({ email, password }));
         }
+
+        // If verified, proceed with login
         const token = data.token;
         if (token) {
           localStorage.setItem('token', token);
         }
         navigate('/');
       } else {
+        // Specifically handle "verify email" error
+        if (data.error === "Please verify your email before signing in") {
+          // Directly navigate to verify-email page
+          navigate('/verify-email', {
+            state: {
+              email,
+            },
+          });
+          return;
+        }
+
+        // Handle other login errors
         setErrorMessage(data.error || 'بيانات الاعتماد غير صحيحة');
       }
     } catch (error) {
@@ -96,7 +110,7 @@ function Login() {
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
+          <div className="input-group">
             <input
               type="email"
               value={email}
@@ -106,7 +120,7 @@ function Login() {
             />
           </div>
 
-          <div className="form-group">
+          <div className="input-group">
             <input
               type="password"
               value={password}
@@ -123,7 +137,7 @@ function Login() {
             </div>
           )}
 
-          <div className="form-options">
+          <div className="remember-me-option">
             <label className="remember-me">
               <input
                 type="checkbox"
@@ -137,7 +151,25 @@ function Login() {
           <button type="submit" className="login-button">
             تسجيل الدخول
           </button>
+
+          <div className="reset-password-container">
+            <span
+              onClick={() => navigate('/request-reset-password')}
+              className="reset-link"
+            >
+              هل نسيت كلمة المرور؟
+            </span>
+          </div>
         </form>
+
+        <div className="signup-prompt">
+          <p>
+            ليس لديك حساب؟{' '}
+            <span onClick={() => navigate('/signup')} className="signup-link">
+              إنشاء حساب
+            </span>
+          </p>
+        </div>
       </div>
     </div>
   );

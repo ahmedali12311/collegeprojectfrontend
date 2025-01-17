@@ -18,7 +18,6 @@ const UserDetails = () => {
     image: null,
     imageUrl: '',
     roles: [],
-    graduation_semester: false
   });
   
   const [message, setMessage] = useState({ text: '', type: '' });
@@ -30,7 +29,8 @@ const UserDetails = () => {
   const ROLES = {
     student: { value: 'student', label: 'طالب', id: '3' },
     teacher: { value: 'teacher', label: 'معلم', id: '2' },
-    admin: { value: 'admin', label: 'مدير', id: '1' }
+    admin: { value: 'admin', label: 'مدير', id: '1' },
+    graduation_student: { value: 'graduation_student', label: 'طالب تخرج', id: '4' } // New role added
   };
   
   const fetchUserDetails = useCallback(async () => {
@@ -54,7 +54,6 @@ const UserDetails = () => {
         username: data.user.username,
         image: null,
         imageUrl: data.user.image || '',
-        graduation_semester: data.user.graduation_semester,
         roles: data.user.roles || []
       });
       setLoading(false);
@@ -67,7 +66,6 @@ const UserDetails = () => {
   useEffect(() => {
     fetchUserDetails();
   }, [fetchUserDetails]);
-
 
   const handleRoleToggle = (role) => {
     setFormData((prev) => {
@@ -83,12 +81,21 @@ const UserDetails = () => {
         currentRoles.push(roleValue);
       }
   
-      // Ensure 'student' conflicts with 'admin' and 'teacher'
+      // Ensure 'student' conflicts with 'admin', 'teacher', and 'graduation_student'
       if (roleValue === 'student' && currentRoles.includes('student')) {
-        // Remove admin and teacher
+        // Remove admin, teacher, and graduation_student
         return {
           ...prev,
-          roles: currentRoles.filter((r) => r !== 'admin' && r !== 'teacher'),
+          roles: currentRoles.filter((r) => r !== 'admin' && r !== 'teacher' && r !== 'graduation_student'),
+        };
+      }
+  
+      // Ensure 'graduation_student' conflicts with 'student'
+      if (roleValue === 'graduation_student' && currentRoles.includes('graduation_student')) {
+        // Remove student
+        return {
+          ...prev,
+          roles: currentRoles.filter((r) => r !== 'admin' && r !== 'teacher' && r !== 'student'),
         };
       }
   
@@ -99,14 +106,13 @@ const UserDetails = () => {
         // Remove student
         return {
           ...prev,
-          roles: currentRoles.filter((r) => r !== 'student'),
+          roles: currentRoles.filter((r) => r !== 'student'&& r !== 'graduation_student'),
         };
       }
   
       return { ...prev, roles: currentRoles };
     });
   };
-  
 
   const handleRoleUpdates = async () => {
     try {
@@ -260,9 +266,6 @@ const handleUpdate = async () => {
     if (formData.password) {
       updateData.append('password', formData.password);
     }
-    
-    // Add graduation semester if changed
-    updateData.append('graduation_semester', formData.graduation_semester.toString());
     
     // Add image if changed
     if (formData.image) {
@@ -420,29 +423,7 @@ const handleUpdate = async () => {
                 </span>
               </div>
   
-              <div className="info-item">
-                {isEditing ? (
-                  <div className="gradu ation-semester-toggle">
-                    <label className="toggle-switch">
-                      <input
-                        type="checkbox"
-                        checked={formData.graduation_semester}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          graduation_semester: e.target.checked
-                        })}
-                      />
-                      <span className="slider round"></span>
-                    </label>
-                    <span>الفصل الدراسي للتخرج</span>
-                  </div>
-                ) : (
-                  <span>
-                    الفصل الدراسي للتخرج: 
-                    {formData.graduation_semester ? 'نعم' : 'لا'}
-                  </span>
-                )}
-              </div>
+         
   
               <div className="info-item">
         {isEditing ? (

@@ -427,7 +427,7 @@ const handleSendEmail = async (e) => {
      
 {overlayVisible && (
         <div className="overlay">
-          <div className="overlay-content">
+          <div className="overlays-content">
             <h2>إرسال بريد إلكتروني</h2>
             <form onSubmit={handleSendEmail}>
               <input

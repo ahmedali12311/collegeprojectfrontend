@@ -144,6 +144,7 @@
   box-shadow: var(--shadow-md);
   overflow: hidden;
   border: 1px solid var(--glass-border);
+  padding-bottom: 0px;
   }
   
   .messages-container {
@@ -462,35 +463,7 @@
   }
   }
   
-  /* Email Button */
-  .overlay-button {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  padding: 1rem 1.5rem;
-  background: var(--primary-gradient);
-  color: white;
-  border: none;
-  border-radius: var(--radius-full);
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-smooth);
-  box-shadow: var(--shadow-md);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  }
-  
-  .overlay-button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  background: var(--accent-gradient);
-  }
-  
-  .overlay-button:active {
-  transform: translateY(0);
-  }
+
   
   /* Delete Button */
   .delete-conversation-button {
@@ -602,13 +575,15 @@
   font-size: 0.875rem;
   cursor: pointer;
   transition: all var(--transition-smooth);
-  position: relative; /* Change to relative for better alignment /
+  max-width: 130px; /* Set max width for the button */
+
+  position: relative;
   margin-left: 10px;
   }
   .conversation-item {
   display: flex;
-  align-items: center; / Align items vertically /
-  justify-content: space-between; / Space between avatar/details and delete button */
+  align-items: center; 
+  justify-content: space-between;
   gap: 1rem;
   padding: 1rem;
   cursor: pointer;
@@ -752,9 +727,11 @@
     background-color: red;
     color:white;
   position: absolute;
-  right: -80px; /* Adjust this value based on your design */
+  left: 260px; /* Adjust this value based on your design */
   top: 50%;
   transform: translateY(-50%);
+  max-width: 120px; /* Set max width for the button */
+
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -1181,6 +1158,8 @@
       background: var(--surface);
       height: calc(100vh - var(--navbar-height));
       overflow-y: auto;
+      padding-bottom: 30px;
+
     }
 
     .messages-container {
@@ -1268,6 +1247,7 @@
     align-items: center;
     border-bottom: 1px solid var(--border);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
   }
 
   .messages-container {
@@ -1293,6 +1273,8 @@
     background: var(--surface);
     height: calc(100vh - var(--navbar-height));
     overflow-y: auto;
+    padding-bottom: 30px;
+
   }
 
   /* Show message window and hide conversation list when a conversation is selected */
@@ -1305,12 +1287,182 @@
   }
 }
 
-/* Add this to your existing CSS */
+
+
+h2 {
+  text-align: center;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.email-input, .message-input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.email-input:focus, .message-input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.file-upload {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.file-input {
+  display: none;
+}
+
+
+
+
+.error-message {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
+}
+/* Overlay background */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Content container */
+.overlays-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.4s ease-in-out;
+}
+
+/* Heading */
+h2 {
+  text-align: center;
+  color: #333;
+  font-size: 1.75rem;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+/* Input fields */
+.email-input, .message-input {
+  width: 100%;
+  padding: 14px;
+  margin: 12px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.email-input:focus, .message-input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* File upload */
+.file-upload {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f7f7f7;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.file-upload span {
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-upload label {
+  cursor: pointer;
+  color: #007bff;
+}
+
+.file-upload label:hover {
+  text-decoration: underline;
+}
+
+
+/* Error message */
+.error-message {
+  color: #e74c3c;
+  text-align: center;
+  margin-top: 12px;
+  font-size: 0.95rem;
+}
+
+/* Animation for fade-in and slide-up */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 600px) {
+  .overlays-content {
+    padding: 20px;
+    width: 90%;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .email-input, .message-input {
+    padding: 12px;
+  }
+
+  button {
+    font-size: 1.1rem;
+  }
+}
+/* Email Button */
 .overlay-button {
   position: fixed;
   bottom: 2rem;
   right: 2rem;
-  padding: 1rem 1.5rem;
+  padding: 0.8rem 1rem; /* Adjust padding to make the button smaller */
   background: var(--primary-gradient);
   color: white;
   border: none;
@@ -1322,5 +1474,146 @@
   z-index: 100;
   display: flex;
   align-items: center;
+  justify-content: center; /* Ensure the content is centered */
   gap: 0.5rem;
+  font-size: 0.9rem; /* Adjust font size for a more compact look */
+  min-width: 150px; /* Ensure the button has a minimal width */
+  max-width: 200px; /* Set a maximum width for the button to prevent stretching */
+  width: auto; /* Let the button size adjust to content, but within min/max range */
+}
+
+/* Button Hover Effect */
+.overlay-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  background: var(--accent-gradient);
+}
+
+/* Button Active Effect */
+.overlay-button:active {
+  transform: translateY(0);
+}
+
+/* Ensure button stays within the viewport on smaller screens */
+@media (max-width: 768px) {
+  .overlay-button {
+    bottom: 1.5rem; /* Adjust the position */
+    right: 1.5rem;  /* Keep the button inside the viewport */
+    padding: 0.8rem 1.2rem; /* Adjust padding for smaller screens */
+    font-size: 0.85rem; /* Smaller font size for smaller screens */
+    min-width: 120px; /* Slightly smaller minimum width */
+    max-width: 180px; /* Reduce max-width for mobile devices */
+  }
+}
+
+@media (max-width: 480px) {
+  .overlay-button {
+    bottom: 1rem; /* Slightly adjust bottom margin */
+    right: 1rem;  /* Adjust right margin to avoid sticking outside the screen */
+    padding: 0.6rem 1rem; /* Adjust padding */
+    font-size: 0.8rem; /* Smaller font size on smaller screens */
+    min-width: 100px; /* Smaller min-width */
+    max-width: 150px; /* Restrict max-width on small screens */
+  }
+}
+/* Message Input Container */
+.message-input-container {
+  padding: 15px;
+  border-top: 1px solid var(--background-color);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--surface-color);
+  box-shadow: var(--shadow-sm);
+  border-radius: 15px; /* Slightly more rounded corners for a smoother look */
+  transition: box-shadow 0.3s ease;
+}
+
+/* Message input field */
+.message-input {
+  width: 100%;
+  padding: 14px 20px; /* More padding for better typing experience */
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 1rem;
+  background-color: #f8f9fa;
+  box-sizing: border-box; /* Prevents the input field from growing */
+  transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect */
+.message-input:hover {
+  border-color: var(--primary-color);
+  background-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Slight shadow when hovered */
+}
+
+/* Focus effect */
+.message-input:focus {
+  border-color: var(--primary-color);
+  background-color: #ffffff;
+  outline: none;
+  box-shadow: 0 0 5px var(--primary-color); /* Soft focus glow */
+}
+
+/* Placeholder styling */
+.message-input::placeholder {
+  color: var(--text-secondary);
+  font-style: italic;
+  opacity: 0.6;
+}
+
+/* Message input with icon/button for send */
+.message-input-container .send-icon {
+  background: var(--primary-color);
+  color: white;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.message-input-container .send-icon:hover {
+  background: var(--accent-gradient);
+  box-shadow: var(--shadow-md);
+}
+
+/* Responsive Design for smaller screens */
+@media (max-width: 768px) {
+  .message-input-container {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .message-input {
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    border-radius: 18px;
+  }
+
+  .message-input-container .send-icon {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .message-input-container {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .message-input {
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    border-radius: 16px;
+  }
+
+  .message-input-container .send-icon {
+    padding: 6px;
+    font-size: 1.1rem;
+  }
 }

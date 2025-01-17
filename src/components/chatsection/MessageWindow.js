@@ -1,8 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
 import { format } from "date-fns";
 import { IoAttach, IoSend } from "react-icons/io5";
-import Modal from '../model';
 import { Sparkles } from 'lucide-react';
+import Modal from '../model';
+import VoiceRecorder from './voicerecorder';
+import AudioPlayer from './audioplayer';
 
 const MessageWindow = ({
   selectedConversation,
@@ -34,7 +36,7 @@ const MessageWindow = ({
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [prevMessagesLength, setPrevMessagesLength] = useState(0);
-  const [fileError, setFileError] = useState(""); // State for file error message
+  const [fileError, setFileError] = useState("");
 
   useEffect(() => {
     const container = messagesContainerRef.current;
@@ -61,33 +63,12 @@ const MessageWindow = ({
 
   useEffect(() => {
     const container = messagesContainerRef.current;
-    if (container) {
-      // Always scroll to bottom when messages change or on first load
-      container.scrollTop = container.scrollHeight;
-    }
-  }, [messages, selectedConversation]);
-  
-  // Remove the separate useEffect for newMessage scrolling, as it's now covered by the above effect
-  
-  useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (container) {
-      // Always scroll to bottom when messages change or on first load
-      container.scrollTop = container.scrollHeight;
-    }
-  }, [messages, selectedConversation]);
-  
-  // Remove the separate useEffect for newMessage scrolling, as it's now covered by the above effect
-  
-  // Modify the scroll handling for loading more messages
-  useEffect(() => {
-    const container = messagesContainerRef.current;
     if (container && prevScrollHeight > 0) {
-      // Maintain scroll position after loading older messages
       const newScrollPosition = container.scrollHeight - prevScrollHeight;
       container.scrollTop = newScrollPosition;
     }
   }, [messages.length, prevScrollHeight]);
+
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (container) {
@@ -102,14 +83,15 @@ const MessageWindow = ({
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 100 * 1024 * 1024) { // Check if file size exceeds 100MB
-        setFileError("حجم الملف يجب أن يكون أقل من 100MB."); // Set error message
+      if (file.size > 100 * 1024 * 1024) {
+        setFileError("حجم الملف يجب أن يكون أقل من 100MB.");
       } else {
-        setFileError(""); // Clear error message
+        setFileError("");
         onFileSelect(file);
       }
     }
   };
+
   const openModal = (mediaSrc) => {
     setCurrentMedia(mediaSrc);
     setIsModalOpen(true);
@@ -140,12 +122,11 @@ const MessageWindow = ({
     setShowDeleteConfirm(false);
     setMessageToDelete(null);
   };
-
   const renderMessage = (message) => {
     const isCurrentUser = message.sender_id === loggedInUserId;
-    const time = format(new Date(message.created_at), 'HH:mm');
+    const time = format(new Date(message.created_at), 'yyyy/MM/dd HH:mm');
     const messageId = message.chat_id || message.id;
-
+  
     const imageExtensions = [
       '.jpg', '.jpeg', '.png', '.gif', '.webp', 
       '.bmp', '.tiff', '.svg', '.heic'
@@ -155,23 +136,24 @@ const MessageWindow = ({
       '.mp4', '.webm', '.avi', '.mov', '.mkv', 
       '.flv', '.wmv', '.m4v', '.mpg', '.mpeg'
     ];
-
+  
     const checkFileExtension = (filename, extensionList) => {
       return extensionList.some(ext => 
         filename.toLowerCase().endsWith(ext)
       );
     };
-
+  
     const fileUrl = `http://localhost:8080/${message.file}`;
-
+    const isAudioMessage = message.file && message.file.toLowerCase().endsWith('.wav');
+  
     return (
       <div
         key={`${messageId}-${message.created_at}`}
-        className={`message ${isCurrentUser  ? "sent" : "received"}`}
+        className={`message ${isCurrentUser ? "sent" : "received"}`}
       >
-        <div className={`message-bubble ${isCurrentUser  ? "sent-bubble" : "received-bubble"}`}>
-          <div className={`message-sender ${isCurrentUser  ? "sent-sender" : "received-sender"}`}>
-            {isCurrentUser  ? "" : message.sender_name}
+        <div className={`message-bubble ${isCurrentUser ? "sent-bubble" : "received-bubble"}`}>
+          <div className={`message-sender ${isCurrentUser ? "sent-sender" : "received-sender"}`}>
+            {isCurrentUser ? "" : message.sender_name}
           </div>
           <div className="message-content">
             <div className="message-text">
@@ -179,7 +161,13 @@ const MessageWindow = ({
             </div>
             {message.file && (
               <div className="message-file">
-                {checkFileExtension(message.file, imageExtensions) ? (
+                {isAudioMessage ? (
+                  <div>
+                    
+                  <AudioPlayer src={fileUrl} />
+</div>
+                ) : checkFileExtension(message.file, imageExtensions) ? (
+
                   <img
                     src={fileUrl}
                     alt="Message attachment"
@@ -218,22 +206,23 @@ const MessageWindow = ({
           <div className="message-time">
             <p className="createdattime">{time}</p>
           </div>
-          {isCurrentUser  && (
+        </div>
+        {isCurrentUser && (
+          <div className="message-delete-container">
             <button
               onClick={() => confirmDelete(message)}
               className="deleting-button"
-              style={{ 
-                alignSelf: 'center',
-                marginLeft: '10px'
-              }}
             >
               حذف
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     );
   };
+  
+  
+
 
   return (
     <>
@@ -279,7 +268,14 @@ const MessageWindow = ({
           </div>
         )}
         {error && <div className="error">{error}</div>}
-        {fileError && <div className="error">{fileError}</div>} <form onSubmit={handleSendMessage} className="message-input-container">
+        {fileError && <div className="error">{fileError}</div>}
+        <form
+  onSubmit={(e) => {
+    e.preventDefault(); // Prevent form submission when pressing the record button
+    handleSendMessage(e);
+  }}
+  className="message-input-container"
+>
           <input
             type="file"
             ref={fileInputRef}
@@ -290,6 +286,12 @@ const MessageWindow = ({
           <button type="button" onClick={handleFileClick} className="attach-buttons" disabled={isSending}>
             <IoAttach />
           </button>
+          
+          <VoiceRecorder
+            onRecordingComplete={(audioFile) => {
+              onFileSelect(audioFile);
+            }}
+          />
           
           <div className="input-wrapper">
             {selectedFile && (
@@ -347,4 +349,5 @@ const MessageWindow = ({
     </>
   );
 };
+
 export default MessageWindow;

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import AddProjectForm from './addpreprojectform'; // Assuming this form works for both projects and pre-projects
 import '../../style/ProjectList.css';
+import { jwtDecode } from 'jwt-decode';
 
 const PreProjects = () => {
   const [preProjects, setPreProjects] = useState([]);
@@ -12,43 +13,19 @@ const PreProjects = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [showAddForm, setShowAddForm] = useState(false);
   const [meta, setMeta] = useState({});
-  const [isStudent, setIsStudent] = useState(false);
-  const [isGraduationSemester, setIsGraduationSemester] = useState(false);
   const [loading, setLoading] = useState(false); // Loading state
-
-  const fetchUserData = useCallback(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetch('http://localhost:8080/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch user data');
-        }
-        return response.json();
-      })
-      .then(data => {
-        const user = data.users;
-        
-        // Check if user is a student
-        const studentRole = user.roles.includes('student');
-        setIsStudent(studentRole);
-
-        // Check if in graduation semester
-        setIsGraduationSemester(studentRole && user.graduation_semester === true);
-      })
-      .catch(error => {
-        console.error('Error fetching user data:', error);
-      });
-    }
-  }, []);
-
+  const token = localStorage.getItem("token");
+  const [isGraduationStudent, setIsGraduationStudent] = useState(false); // New state for graduation_student role
   useEffect(() => {
-    fetchUserData();
-  }, [fetchUserData]);
+    const checkUserRole = () => {
+      if (token) {
+        const decodedToken = jwtDecode(token);
+        setIsGraduationStudent(decodedToken.user_role.includes("graduation_student"));
+      }
+    };
+    checkUserRole();
+  }, [token, isGraduationStudent]);
+  
 
 
   const fetchPreProjects = useCallback(() => {
@@ -135,7 +112,7 @@ const PreProjects = () => {
     <div id="project-list-container">
       <h1>مشاريع المقدمة</h1>
 
-      {isStudent && isGraduationSemester && (
+      {isGraduationStudent && (
         <button onClick={handleAddButtonClick} className="add-project-btn">إضافة مقدمة مشروع</button>
       )}
 
@@ -194,7 +171,7 @@ const PreProjects = () => {
           التالي
         </button>
       </div>
-      {showAddForm && isGraduationSemester && (
+      {showAddForm && isGraduationStudent && (
         <div className="overlay">
           <AddProjectForm closeForm={() => setShowAddForm(false)} refreshProjects={fetchPreProjects} />
         </div>

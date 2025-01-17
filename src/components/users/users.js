@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import '../../style/users.css';
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -13,7 +12,6 @@ const Users = () => {
     last_page: 1
   });
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(false);
   const [successMessage, setSuccessMessage] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState('created_at');
@@ -29,15 +27,7 @@ const Users = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    const checkUserRole = () => {
-      if (token) {
-        const decodedToken = jwtDecode(token);
-        setIsAdmin(decodedToken.user_role.includes("admin"));
-      }
-    };
-    checkUserRole();
-  }, [token, setIsAdmin]);
+
 
   const fetchUsers = useCallback(async (page = 1, searchTerm = "") => {
     try {
@@ -219,14 +209,12 @@ const handleImageChange = (e) => {
 
 return (
   <div className="users-container" dir="rtl">
-    {isAdmin && (
       <button 
         className="add-user-button" 
         onClick={() => setIsFormVisible(true)}
       >
         إضافة مستخدم
       </button>
-    )}
 
 {isFormVisible && (
   <div className="overlay">

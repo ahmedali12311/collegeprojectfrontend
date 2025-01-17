@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 
-const FileUpload = ({ file, onFileChange }) => {
+const FileUpload = ({ file, onFileChange, label = "اختر ملف" }) => {
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
@@ -13,7 +13,7 @@ const FileUpload = ({ file, onFileChange }) => {
 
   return (
     <div className="file-upload" onClick={triggerFileInput}>
-      <span>{file ? file.name : "Choose a file"}</span>
+      <span>{file ? file.name : label}</span> {/* Use the label prop here */}
       <input
         type="file"
         ref={fileInputRef}

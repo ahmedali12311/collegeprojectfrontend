@@ -16,14 +16,10 @@ const PreProjectDetail = () => {
   const [userId, setUserId] = useState(null); // State to hold user ID
   const [canUpdate, setCanUpdate] = useState(project?.can_update || false);
   const [showTransferToBookOverlay, setShowTransferToBookOverlay] = useState(false);
-  const [discussantError, setDiscussantError] = useState('');
   const [messageType, setMessageType] = useState('success');
-
+  const [updating, setUpdating] = useState(false); // New loading state for update
   const [shadowMessage, setShadowMessage] = useState('');
-
-  const [teachers, setTeachers] = useState([]);
-  const [selectedDiscussants, setSelectedDiscussants] = useState([]);
-
+  const [degree, setDegree] = useState('');
   const checkUserRole = () => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -32,26 +28,7 @@ const PreProjectDetail = () => {
       setUserId(decodedToken.id); // Set user ID from decoded token
     }
   };
-  useEffect(() => {
-    const fetchTeachers = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/teachers', {
-          headers: { 
-            Authorization: `Bearer ${localStorage.getItem('token')}` 
-          }
-        });
-        
-        if (!response.ok) throw new Error('Network response was not ok');
-        
-        const data = await response.json();
-        setTeachers(data.teachers || []); // Adjust based on your API response structure
-      } catch (error) {
-        console.error('Error fetching teachers:', error);
-      }
-    };
-
-    fetchTeachers();
-  }, []);
+ 
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -70,8 +47,7 @@ const PreProjectDetail = () => {
             students: data.pre_project.students, // Keep the full student objects
             advisors: data.pre_project.advisors,
             accepted_advisor_info: data.pre_project.accepted_advisor_info,
-        discussants: data.pre_project.discussants || [] // Assuming discussants are part of the response
-
+        discussants: data.pre_project.discussants || [], // Assuming discussants are part of the response
  
         };
         setProject(mappedProject);
@@ -203,90 +179,54 @@ const PreProjectDetail = () => {
     );
   }
  
-  const handleDiscussantSelect = (teacherId) => {
-    // Prevent duplicate selections
-    if (!selectedDiscussants.includes(teacherId)) {
-      setSelectedDiscussants([...selectedDiscussants, teacherId]);
-    }
-  };
 
-  const removeDiscussant = (teacherId) => {
-    setSelectedDiscussants(selectedDiscussants.filter(id => id !== teacherId));
-  };
 
   const handleUpdateStatusToggle = async () => {
+    setUpdating(true); // Set updating to true when starting the update
     try {
-      const token = localStorage.getItem('token');
-      
-      // Create FormData to match backend expectations
-      const formData = new FormData();
-      
-      // Add can_update as a form field
-      formData.append('can_update', String(!canUpdate));
-      
-      // If the backend expects a file field, add a placeholder or skip
-      // Uncomment if needed: formData.append('file', new Blob(), 'placeholder.txt');
-  
- 
-      const response = await fetch(`http://localhost:8080/preproject/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          // Remove Content-Type to let browser set multipart/form-data
-        },
-        body: formData
-      });
-  
-      const responseText = await response.text();
-  
-      if (!response.ok) {
-        // Try to parse error response
-        let errorMessage;
-        try {
-          const errorJson = JSON.parse(responseText);
-          errorMessage = errorJson.error || 'حدث خطأ أثناء تغيير حالة التحديث';
-        } catch {
-          errorMessage = responseText || 'حدث خطأ أثناء تغيير حالة التحديث';
-        }
-  
-        throw new Error(errorMessage);
-      }
-  
-      // Parse response
-      const data = JSON.parse(responseText);
-  
-      // Update states
-      setProject(prevProject => ({
-        ...prevProject,
-        can_update: data.pre_project.pre_project.can_update
-      }));
-      setCanUpdate(data.pre_project.pre_project.can_update);
-      const buttonState = data.pre_project.pre_project.can_update;
-      const messageType = buttonState ? 'success' : 'disabled';
+        const token = localStorage.getItem('token');
+        const formData = new FormData();
+        formData.append('Can_update', String(!canUpdate));
 
-      const successMessage = data.pre_project.pre_project.can_update 
-        ? 'تم تفعيل التحديث' 
-        : 'تم إيقاف التحديث';
-      
-      setShadowMessage(successMessage);
-      setMessageType(messageType);
-      
-      setTimeout(() => {
-        setShadowMessage('');
-      }, 3000);
+        const response = await fetch(`http://localhost:8080/canupdate/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+        });
 
-    } catch (error) {
-      setShadowMessage(error.message || 'حدث خطأ غير متوقع');
-      setMessageType('error');
-      
-      setTimeout(() => {
-        setShadowMessage('');
-      }, 3000);
-              console.groupEnd();
+        if (response.ok) {
+            setProject(prevProject => ({
+                ...prevProject,
+                can_update: !canUpdate,
+            }));
+            setCanUpdate(!canUpdate);
+
+            // Update the message based on the new state
+            if (!canUpdate) {
+                setShadowMessage('تم تفعيل التحديث');
+                setMessageType('success');
+            } else {
+                setShadowMessage('تم تعطيل التحديث');
+                setMessageType('error'); 
             }
-
-  };
-  // Add this method in your PreProjectDetail component
+        } else {
+            const errorMessage = 'حدث خطأ أثناء تغيير حالة التحديث';
+            setShadowMessage(errorMessage);
+            setMessageType('error');
+        }
+    } catch (error) {
+        console.error('Error:', error.message);
+        setShadowMessage(error.message || 'حدث خطأ غير متوقع');
+        setMessageType('error');
+    } finally {
+        setUpdating(false); // Reset updating state when done
+        setTimeout(() => {
+            setShadowMessage('');
+        }, 3000);
+    }
+};
 const handleResetAdvisors = async () => {
   try {
     const token = localStorage.getItem('token');
@@ -347,17 +287,22 @@ const handleResetAdvisors = async () => {
   const isAdvisor = project?.advisors.some((advisor) => advisor.advisor_id === userId);
   const hasAcceptedAdvisor = project?.accepted_advisor !== null;
   const isProjectOwner = project?.project_owner === userId;
+
   const handleTransferToBook = async () => {
-    // Validate discussant selection
-    if (selectedDiscussants.length === 0) {
-      setDiscussantError('يرجى اختيار المناقشين');
+    // Validate degree input
+    if (!degree) {
+      alert('يرجى إدخال الدرجة');
       return;
     }
-    const discussantEmails = selectedDiscussants.map(teacherId => {
-      const teacher = teachers.find(t => t.id === teacherId);
-      return teacher.email; // Assuming teachers array has an email property
-    });
-        try {
+    if(degree<=0){
+      alert('يرجى إدخال درجة صحيحة');
+      return;
+    }
+    if(degree>100){
+      alert('يرجى إدخال درجة اقل من 100');
+      return;
+    }
+    try {
       const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:8080/transferbook/${id}`, {
         method: 'POST',
@@ -366,7 +311,7 @@ const handleResetAdvisors = async () => {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
-          discutants: discussantEmails // Send discussant emails
+          degree: degree // Send only the degree
         })
       });
 
@@ -388,8 +333,7 @@ const handleResetAdvisors = async () => {
     } finally {
       // Close the overlay
       setShowTransferToBookOverlay(false);
-      setSelectedDiscussants([]);
-      setDiscussantError('');
+      setDegree(''); // Reset degree after transfer
     }
   };
   return (
@@ -398,23 +342,24 @@ const handleResetAdvisors = async () => {
         <Sparkles className="header-icon" />
         <h2>تفاصيل مقدمة المشروع</h2>
       </div>
-      {(isAdmin ) && (
-  <div style={{ 
-    display: 'flex', 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    margin: '15px 0' 
-  }}>
-    <label style={{ marginLeft: '10px' }}>حالة التحديث</label>
-    <CustomSwitch 
-      checked={canUpdate}
-      onChange={handleUpdateStatusToggle}
-    />
-    <span style={{ marginRight: '10px' }}>
-      {canUpdate ? 'مفعل' : 'معطل'}
-    </span>
-  </div>
-)}
+      {(isAdmin) && (
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '15px 0'
+                }}>
+                    <label style={{ marginLeft: '10px' }}>حالة التحديث</label>
+                    <CustomSwitch
+                        checked={canUpdate}
+                        onChange={handleUpdateStatusToggle}
+                        disabled={updating} // Disable while updating
+                    />
+                    <span style={{ marginRight: '10px' }}>
+                        {canUpdate ? 'مفعل' : 'معطل'}
+                    </span>
+                </div>
+            )}
   {shadowMessage && (
         <div 
           className={`shadow-message shadow-message-${messageType}`}
@@ -536,12 +481,6 @@ const handleResetAdvisors = async () => {
   </div>
 )}
 
-{project.degree  && (
-  <div className="info-group">
-    <label>الدرجة</label>
-    <p>{project.degree}</p>
-  </div>
-)}
           <div className="info-row">
             <div className="info-group">
               <label>السنة</label>
@@ -674,87 +613,45 @@ const handleResetAdvisors = async () => {
       </div>
 
 </div>
-      
-      {showTransferToBookOverlay && (
-  <div className="modal-overlay">
-    <div className="overlay-content">
-      <h2>اختيار المناقشين</h2>
-      
-      <div className="form-grid">
-        <div className="form-column">
-          <div className="form-group">
-            <span>المناقشون</span>
-            <select 
-              onChange={(e) => handleDiscussantSelect(e.target.value)}
-              className="form-control"
-            >
-              <option value="">اختر مناقش</option>
-              {teachers.map((teacher) => (
-                <option 
-                  key={teacher.id} 
-                  value={teacher.id}
-                  disabled={selectedDiscussants.includes(teacher.id)}
-                >
-                  {teacher.name}
-                </option>
-              ))}
-            </select>
-
-            {/* Display selected discussants */}
-            {selectedDiscussants.length > 0 && (
-              <div className="selected-discussants">
-                {selectedDiscussants.map((teacherId) => {
-                  const teacher = teachers.find(t => t.id === teacherId);
-                  return (
-                    <div 
-                      key={teacherId} 
-                      className="dynamic-field"
-                    >
-                      {teacher.name}
-                      <button
-                        type="button"
-                        onClick={() => removeDiscussant(teacherId)}
-                      >
-                        حذف
-                      </button>
-                    </div>
-                  );
-                })}
+{showTransferToBookOverlay && (
+        <div className="modal-overlay">
+          <div className="overlay-content">
+            <div className="form-grid">
+              <div className="form-column">
+                <div className="form-group">
+                  <span>الدرجة</span>
+                  <input 
+                    type="text" 
+                    value={degree} 
+                    onChange={(e) => setDegree(e.target.value)} 
+                  />
+                </div>
               </div>
-            )}
-          </div>
-
-          {discussantError && (
-            <div className="error-message">
-              {discussantError}
             </div>
-          )}
-        </div>
-      </div>
 
+            <div className="confirmation-buttons">
+              <button 
+                className="confirm-yes"
+                onClick={handleTransferToBook}
+                disabled={!degree} // Disable if no degree
+              >
+                <Check className="button-icon" />
+                <span>نقل</span>
+              </button>
+              <button 
+                className="confirm-no"
+                onClick={() => {
+                  setShowTransferToBookOverlay(false);
+                  setDegree(''); // Reset degree when closing
+                }}
+              >
+                <X className="button-icon" />
+                <span>إلغاء</span>
+              </button>
+            </div>
       
         
-        <div className="confirmation-buttons">
-          <button 
-            className="confirm-yes"
-            onClick={handleTransferToBook}
-            disabled={selectedDiscussants.length === 0}
-          >
-            <Check className="button-icon" />
-            <span>نقل</span>
-          </button>
-          <button 
-            className="confirm-no"
-            onClick={() => {
-              setShowTransferToBookOverlay(false);
-              setSelectedDiscussants([]);
-              setDiscussantError('');
-            }}
-          >
-            <X className="button-icon" />
-            <span>إلغاء</span>
-          </button>
-        </div>
+   
       </div>
     </div>
   )}

@@ -32,7 +32,7 @@ const EditPreProjectForm = ({ project, closeForm, onUpdate }) => {
     return [];
   };
 
-  const parseStudents = (students) => {
+ const parseStudents = (students) => {
     if (!students) return [];
     const studentList = project.pre_project ? project.pre_project.students : students;
     const projectOwnerId = getProjectDetail('project_owner');
@@ -199,25 +199,6 @@ const EditPreProjectForm = ({ project, closeForm, onUpdate }) => {
     );
   };
 
-  const renderDegreeField = () => {
-    if (!isAdmin) return null;
-    return (
-      <div className={`form-group ${errors.degree ? "error-label" : ""}`}>
-        <span>الدرجة</span>
-        <input
-          type="number"
-          name="degree"
-          value={formData.degree}
-          onChange={handleChange}
-          min="0"
-          max="100"
-          className={errors.degree ? "error-input" : ""}
-          disabled={isSubmitting}
-        />
-        {errors.degree && <div className="error-message">{errors.degree}</div>}
-      </div>
-    );
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -254,21 +235,8 @@ const EditPreProjectForm = ({ project, closeForm, onUpdate }) => {
     }
 
     // Degree validation (only for admin)
-    if (isAdmin && formData.degree !== '') {
-      const degreeNum = Number(formData.degree);
-      if (isNaN(degreeNum) || degreeNum < 0 || degreeNum > 100) {
-        validationErrors.degree = "الدرجة يجب أن تكون بين 0 و 100";
-      }
-    }
-    if (formData.degree !== '') {
    
-      if (formData.degree <= 0) {
-        validationErrors.degree = "الدرجة قبل ان تكون موجبة أو أكبر من ال 0";
-      }
-      if (formData.degree > 100) {
-        validationErrors.degree = "الدرجة يجب ان تكون اقل من 100 درجة";
-      }
-    }
+   
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       setIsSubmitting(false);
@@ -500,7 +468,6 @@ const EditPreProjectForm = ({ project, closeForm, onUpdate }) => {
                 </div>
   
                 {renderDiscutantsField()}
-                {renderDegreeField()}
   
                 <div className="form-row">
                   <div className={`form-group ${errors.year ? "error-label" : ""}`}>

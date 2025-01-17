@@ -17,9 +17,16 @@ import Users from './components/users/users.js';
 import Usersdetails from './components/users/userdetails.js';
 import AboutCollege from './components/AboutCollege.js';
 
+import Signup from './components/loginsection/signup.js';
+import VerifyEmail from './components/loginsection/verification.js';
+import RequestResetPassword from './components/loginsection/requestpassword.js';
+import ResetPassword from './components/loginsection/resetpassword.js';
+import VerifyResetCode from './components/loginsection/verifyresetcode.js';
+
 function App() {
   const location = useLocation();
-  const isPublicRoute = location.pathname === '/' || location.pathname === '/login';
+  const isPublicRoute = location.pathname === '/' || location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/verify-reset-code' 
+  || location.pathname === '/verify-email' || location.pathname === '/request-reset-password' || location.pathname === '/reset-password';
 
   return (
     <>
@@ -29,6 +36,12 @@ function App() {
           <Route path="/" element={<Main />} />
           <Route path="/login" element={<Login />} />
           <Route path="/projects" element={<ProjectList />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/verify-reset-code" element={<VerifyResetCode />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/request-reset-password" element={<RequestResetPassword />} />
+
           <Route path="/preprojects" element={<PreProjectList />} />
           <Route path="/projects/:id" element={<ProjectDetail />} />
           <Route path="/preprojects/:id" element={<PreProjectDetail />} />

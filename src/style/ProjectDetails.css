@@ -376,4 +376,18 @@
       transform: translateX(-50%) translateY(-20px);
     }
   }
-  
+  .shadow-message {
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.shadow-message-success {
+    background-color: #d4edda; /* Light green for success */
+    color: #155724; /* Dark green text */
+}
+
+.shadow-message-error {
+    background-color: #f8d7da; /* Light red for error */
+    color: #721c24; /* Dark red text */
+}

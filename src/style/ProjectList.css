@@ -1,0 +1,843 @@
+
+/* Container */
+#project-list-container {
+  padding: 60px 5%;
+  background-color: rgba(255, 255, 255, 0.7); /* Glassmorphism effect */
+  backdrop-filter: blur(15px); /* Blurring the background */
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Header Styling */
+#project-list-container h1 {
+  font-size: 52px;
+  color: #1a374d;
+  text-align: center;
+  margin-bottom: 50px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+  line-height: 1.2;
+}
+
+#project-list-container h1::after {
+  content: '';
+  display: block;
+  width: 80px;
+  height: 5px;
+  background: linear-gradient(90deg, #00b4d8, #3a86ff);
+  margin: 12px auto 0;
+  z-index: -1;
+  border-radius: 5px;
+}
+
+/* Controls (Search & Sort) */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.search-input,
+.sort-select {
+  padding: 14px;
+  border: 2px solid rgba(26, 55, 77, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  color: #333;
+  font-size: 16px;
+  transition: border-color 0.3s ease, background 0.3s ease;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.search-input:focus,
+.sort-select:focus {
+  border-color: #3a86ff;
+  background: rgba(255, 255, 255, 0.8);
+  outline: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.search-input {
+  width: 100%;
+  max-width: 500px;
+}
+
+.sort-select {
+  width: 100%;
+  max-width: 220px;
+  cursor: pointer;
+}
+
+/* Add Project Button */
+.add-project-btn {
+  display: inline-block; /* Ensures button takes only the necessary space */
+  padding: 16px 34px;
+  font-size: 18px;
+  color: #fff;
+  background: linear-gradient(135deg, #00b4d8, #3a86ff);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  transition: all 0.3s ease;
+  margin: 30px 10px; /* Added small margin for spacing */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.add-project-btn:hover {
+  background: linear-gradient(135deg, #0096c7, #0077b6);
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+/* Project List Styling */
+.project-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 2fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+/* Individual Project Item Styling */
+.project-item {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.project-item a {
+  display: block; /* Ensure entire project item is clickable */
+  color: inherit; /* Inherit text color */
+  text-decoration: none; /* Remove underline */
+  height: 100%; /* Make the link cover the whole item */
+  transition: all 0.3s ease;
+}
+
+.project-item:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.project-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(0, 180, 216, 0.2), rgba(58, 134, 255, 0.2));
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none; /* This makes sure the pseudo-element doesn't block clicks */
+}
+.project-item:hover::before {
+  opacity: 1;
+}
+
+.project-name {
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.project-description {
+  font-size: 16px;
+  color: #555;
+}
+
+/* No projects found styling */
+.no-projects {
+  text-align: center;
+  color: #999;
+  font-size: 1.2em;
+}
+
+/* Pagination Styling */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 40px;
+}
+
+.pagination-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 50px;
+  background-color: #00b4d8;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 0 5px; /* Tiny space between pagination buttons */
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #0077b6;
+  transform: translateY(-3px);
+}
+
+.pagination-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.pagination span {
+  font-size: 1.1em;
+  font-weight: 500;
+  color: #666;
+}
+
+/* Overlay for Add Project Form */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Add Project Form Styling */
+.overlay-content {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  animation: fadeIn 0.3s ease-out;
+  backdrop-filter: blur(20px);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Close Button Styling */
+.close-button {
+  background: transparent;
+  border: none;
+  color: #3a86ff;
+  font-size: 20px;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.close-button:hover {
+  color: #ff4d4d;
+}
+
+/* Form Input Fields */
+.overlay-content input,
+.overlay-content textarea,
+.overlay-content select {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid rgba(26, 55, 77, 0.2);
+  border-radius: 10px;
+  margin-bottom: 20px;
+  background-color: rgba(255, 255, 255, 0.6);
+  color: #333;
+  transition: border-color 0.3s ease;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.overlay-content input:focus,
+.overlay-content textarea:focus,
+.overlay-content select:focus {
+  border-color: #3a86ff;
+  outline: none;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* File Upload Button Styling */
+.file-upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(26, 55, 77, 0.2);
+  background: rgba(255, 255, 255, 0.6);
+  color: #333;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.file-upload:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+  transform: translateY(-3px);
+}
+
+.file-upload input[type="file"] {
+  display: none;
+}
+
+/* Submit Button */
+.overlay-content button {
+  background-color: #00b4d8;
+  color: #fff;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  margin: 2PX;
+  width: 100%;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.overlay-content button:hover {
+  background-color: #0077b6;
+  transform: translateY(-5px);
+}
+
+/* Error Message Styling */
+.error-message {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 77, 77, 0.1);
+  color: #ff4d4d;
+  font-size: 0.9em;
+  padding: 10px;
+  border: 1px solid #ff4d4d;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.error-message::before {
+  content: "⚠️";
+  margin-right: 8px;
+}
+
+/* Success Input */
+.input-success {
+  border-color: #28a745;
+}
+
+.input-success:focus {
+  border-color: darkgreen;
+}
+/* Media Styling */
+.post-card img,
+.post-card video {
+  max-width: 100%; /* Responsive width */
+  max-height: 300px; /* Limit height */
+  border-radius: 10px; /* Rounded corners for images */
+  margin-top: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for hover effects */
+  cursor: pointer; /* Indicate that the image is clickable */
+}
+
+.post-card img:hover,
+.post-card video:hover {
+  transform: scale(1.05); /* Slight zoom effect on hover */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* Darker shadow on hover */
+}
+.media-container img {
+  width: 100%; /* Responsive */
+  height: auto; /* Maintain aspect ratio */
+  max-height: 400px; /* Limit height */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  object-fit: cover; /* Cover the container while maintaining aspect ratio */
+  transition: transform 0.3s ease, filter 0.3s ease; /* Smooth scaling and filter transition */
+}
+
+.media-container img:hover {
+  transform: scale(1.05); /* Slightly enlarge on hover */
+  filter: brightness(1.1); /* Slightly brighten on hover */
+}
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-color: #e8f0f2;
+  color: #333;
+  line-height: 1.6;
+  overflow-x: hidden;
+  padding-top: 60px; /* Adjust padding for navbar */
+}
+
+/* Post Form Styling */
+.post-form {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+}
+
+.post-form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.8em;
+  color: #1a374d;
+}
+
+.post-form form {
+  display: flex;
+  flex-direction: column;
+}
+
+.post-form textarea {
+  resize: none;
+  padding: 14px;
+  border: 2px solid rgba(26, 55, 77, 0.2);
+  border-radius: 10px;
+  margin-bottom: 20px;
+  background-color: rgba(255, 255, 255, 0.6);
+  color: #333;
+  transition: border-color 0.3s ease;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.post-form textarea:focus {
+  border-color: #3a86ff;
+  outline: none;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.post-form button {
+  background-color: #00b4d8;
+  color: #fff;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.post-form button:hover {
+  background-color: #0077b6;
+  transform: translateY(-5px);
+}
+
+@media (max-width: 600px) {
+  .post-form {
+    padding: 10px;
+  }
+
+  .post-form h2 {
+    font-size: 1.5em;
+  }
+
+  .post-form button {
+    padding: 12px;
+  }
+}
+
+/* Add this CSS to your existing styles */
+
+/* Form Row Styling */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; /* Space between columns */
+}
+
+.form-row > div {
+  flex: 1; /* Allow children to grow */
+  min-width: 300px; /* Minimum width for responsiveness */
+}
+
+/* Adjust the button styling for better appearance */
+.overlay-content button {
+  margin-top: 10px; /* Add some spacing between buttons */
+}
+
+/* Form Container */
+.overlay-content {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 1000px;
+  margin: 1rem auto;
+  direction: rtl;
+  max-height: 95vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Scrollbar Styling */
+.overlay-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.overlay-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.overlay-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.overlay-content::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+.overlay-content h2 {
+  text-align: center;
+  color: #1a374d;
+  margin-bottom: 1.5rem;
+  font-size: 1.6rem;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  padding: 1rem 0;
+  z-index: 10;
+}
+
+/* Grid Layout */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group span {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 500;
+  color: #1a374d;
+  font-size: 0.95rem;
+}
+
+/* Form Row */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Inputs */
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background-color: #fff;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #3a86ff;
+  box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.1);
+}
+
+textarea {
+  min-height: 150px;
+  max-height: 300px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* Dynamic Fields */
+.dynamic-field {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.dynamic-field input {
+  flex: 1;
+}
+
+.dynamic-field button {
+  padding: 0.5rem 0.75rem;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.dynamic-field button:hover:not(:disabled) {
+  background-color: #ff3333;
+}
+
+/* File Upload */
+.file-upload {
+  border: 2px dashed #e2e8f0;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.25rem;
+}
+
+.file-upload:hover {
+  border-color: #3a86ff;
+  background-color: rgba(58, 134, 255, 0.05);
+}
+
+.file-upload input[type="file"] {
+  display: none;
+}
+
+/* Error States */
+.error-label span {
+  color: #ff4d4d;
+}
+
+.error-input {
+  border-color: #ff4d4d;
+}
+
+.error-message {
+  color: #ff4d4d;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Buttons */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  padding: 1rem 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+button {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+button[type="submit"] {
+  background: linear-gradient(90deg, #00b4d8, #3a86ff);
+  color: white;
+  min-width: 120px;
+}
+
+button[type="submit"]:hover:not(:disabled) {
+  background: linear-gradient(90deg, #00b4d8, #3a86ff);
+}
+
+.cancel-button {
+  background-color: #e2e8f0;
+  color: #1a374d;
+  min-width: 100px;
+}
+
+.cancel-button:hover:not(:disabled) {
+  background-color: #cbd5e1;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Add Field Buttons */
+button[type="button"]:not(.cancel-button) {
+  background: linear-gradient(90deg, #00b4d8, #3a86ff);
+  color: white;
+  width: auto;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+}
+
+button[type="button"]:not(.cancel-button):hover:not(:disabled) {
+  background: linear-gradient(90deg, #00b4d8, #3a86ff);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+  .overlay-content {
+    width: 95%;
+    padding: 1rem;
+    margin: 0.5rem auto;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  button {
+    width: 100%;
+  }
+}
+.similar-projects-error {
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 0 auto;
+  direction: rtl;
+  font-family: 'Cairo', 'Tajawal', Arial, sans-serif;
+}
+
+.error-message {
+  color: #d9534f;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.error-message::before {
+  content: '⚠️';
+  font-size: 1.5rem;
+}
+
+.similar-projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.similar-project-item {
+  background-color: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+.similar-project-item:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  transform: translateY(-3px);
+}
+
+.similar-project-item-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #343a40;
+  margin-bottom: 5px;
+}
+
+.similar-project-item-description {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.similar-project-item-similarity {
+  color: #28a745;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.link-button {
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.link-button:hover {
+  background-color: #0056b3;
+}
+.overlay-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Allow the content to take full height */
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Allow the form to grow and take available space */
+  overflow-y: auto; /* Add scrolling if the content is too long */
+  padding-bottom: 20px; /* Space for the buttons */
+}
+
+.form-grid {
+  flex: 1; /* This allows the form fields to take up available space */
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between; /* Space between buttons */
+  margin-top: 20px; /* Space above the buttons */
+}
